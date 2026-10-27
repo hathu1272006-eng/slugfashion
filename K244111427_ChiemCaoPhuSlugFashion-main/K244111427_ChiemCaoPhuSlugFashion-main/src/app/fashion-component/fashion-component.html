@@ -1,0 +1,44 @@
+<main class="fashion-page">
+  <header class="page-heading">
+    <div>
+      <p class="eyebrow">FASHION CATALOG</p>
+      <h1>Khám phá thời trang</h1>
+      <p class="description">Bộ sưu tập phong cách được chọn lọc dành cho bạn.</p>
+    </div>
+    <a class="search-link" routerLink="/search-fashion">Tìm kiếm bộ sưu tập</a>
+  </header>
+
+  @if (errMessage()) {
+    <p class="state-message error" role="alert">{{ errMessage() }}</p>
+  } @else if (isLoading()) {
+    <p class="state-message">Đang tải bộ sưu tập...</p>
+  } @else if (fashions().length === 0) {
+    <p class="state-message">Chưa có mẫu thời trang nào.</p>
+  } @else {
+    <div class="fashion-grid">
+      @for (fashion of fashions(); track fashion.IdF) {
+        <article class="fashion-card">
+          <a class="card-image-link" [routerLink]="['/fashion-detail', fashion.slug]">
+            <img
+              class="fashion-image"
+              [src]="fashion.Base64String"
+              [alt]="fashion.fashion_subject"
+            >
+            <span class="id-badge">#{{ fashion.IdF }}</span>
+          </a>
+          <div class="card-content">
+            <p class="fashion-style">{{ fashion.style || 'FASHION' }}</p>
+            <h2>{{ fashion.fashion_subject }}</h2>
+            <p class="fashion-description">{{ fashion.fashion_detail }}</p>
+            <div class="card-footer">
+              <a class="slug-label" [routerLink]="['/fashion-detail', fashion.slug]">{{ fashion.slug }}</a>
+              <a [routerLink]="['/fashion-detail', fashion.slug]" [attr.aria-label]="'Xem chi tiết ' + fashion.fashion_subject">
+                Xem chi tiết <span aria-hidden="true">→</span>
+              </a>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</main>

@@ -1,0 +1,55 @@
+<main class="detail-page">
+  <a class="back-link" routerLink="/fashion-list">← Quay lại bộ sưu tập</a>
+
+  @if (!fashion()) {
+    <section class="lookup-panel">
+      <p class="eyebrow">FASHION LOOKUP</p>
+      <h1>Tìm Fashion bằng slug</h1>
+      <p>Nhập slug để mở chính xác mẫu thời trang tương ứng.</p>
+      <form (ngSubmit)="searchFashion(slug)">
+        <label for="fashion-slug">Slug Fashion</label>
+        <div class="lookup-controls">
+          <input
+            id="fashion-slug"
+            name="slug"
+            type="search"
+            [(ngModel)]="slug"
+            placeholder="Ví dụ: ao-khoac-nu-1"
+            autocomplete="off"
+          >
+          <button type="submit">Xem chi tiết</button>
+        </div>
+      </form>
+    </section>
+  }
+
+  @if (isLoading()) {
+    <p class="state-message">Đang tải chi tiết Fashion...</p>
+  } @else if (errMessage()) {
+    <p class="state-message error" role="alert">{{ errMessage() }}</p>
+  }
+
+  @if (fashion(); as item) {
+    <article class="fashion-detail">
+      <div class="detail-image-wrap">
+        <img [src]="item.Base64String" [alt]="item.fashion_subject">
+      </div>
+      <div class="detail-copy">
+        <p class="eyebrow">{{ item.style || 'FASHION' }} <span>·</span> #{{ item.IdF }}</p>
+        <h1>{{ item.fashion_subject }}</h1>
+        <p class="fashion-description">{{ item.fashion_detail }}</p>
+        <dl class="fashion-meta">
+          <div>
+            <dt>Fashion ID</dt>
+            <dd>{{ item.IdF }}</dd>
+          </div>
+          <div>
+            <dt>Slug</dt>
+            <dd>{{ item.slug }}</dd>
+          </div>
+        </dl>
+        <a class="browse-link" routerLink="/fashion-list">Khám phá các mẫu khác <span aria-hidden="true">→</span></a>
+      </div>
+    </article>
+  }
+</main>

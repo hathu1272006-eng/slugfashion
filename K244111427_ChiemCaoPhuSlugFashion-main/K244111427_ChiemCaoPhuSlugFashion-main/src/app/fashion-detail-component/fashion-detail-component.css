@@ -1,0 +1,252 @@
+:host {
+  display: block;
+  min-height: 100%;
+  padding: 34px 22px 64px;
+  background: #f7f5f2;
+  color: #22201f;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.detail-page {
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.back-link,
+.browse-link {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 20px;
+  border-radius: 10px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.back-link {
+  margin-bottom: 22px;
+  border: 1px solid #d8c7bd;
+  background: #fff;
+  color: #633a2e;
+}
+
+.back-link:hover {
+  background: #f0e8e3;
+  color: #4d2b22;
+}
+
+.lookup-panel {
+  max-width: 650px;
+  margin: 20px auto 28px;
+  padding: 28px;
+  border: 1px solid #ece6e1;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 10px 26px rgb(55 39 28 / 5%);
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  color: #a05c45;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.eyebrow span {
+  padding: 0 4px;
+}
+
+h1 {
+  margin: 0 0 10px;
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.lookup-panel > p:not(.eyebrow) {
+  color: #77716c;
+}
+
+label {
+  display: block;
+  margin: 20px 0 8px;
+  color: #514942;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.lookup-controls {
+  display: flex;
+  gap: 10px;
+}
+
+input {
+  flex: 1;
+  min-width: 0;
+  min-height: 52px;
+  padding: 12px 15px;
+  border: 1px solid #d9cfc7;
+  border-radius: 9px;
+  background: #fff;
+  color: #22201f;
+  font: inherit;
+}
+
+input:focus {
+  border-color: #a05c45;
+  outline: 3px solid rgb(160 92 69 / 14%);
+}
+
+button {
+  min-height: 52px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 10px;
+  background: #633a2e;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 5px 12px rgb(99 58 46 / 20%);
+  transition: background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  background: #4d2b22;
+  box-shadow: 0 7px 16px rgb(99 58 46 / 25%);
+}
+
+.browse-link {
+  min-height: 52px;
+  padding: 0 22px;
+  background: #633a2e;
+  color: #fff;
+  box-shadow: 0 5px 12px rgb(99 58 46 / 18%);
+}
+
+.browse-link:hover {
+  transform: translateY(-1px);
+  background: #4d2b22;
+  color: #fff;
+}
+
+.back-link:focus-visible,
+.browse-link:focus-visible,
+button:focus-visible {
+  outline: 3px solid #c48a70;
+  outline-offset: 3px;
+}
+
+.fashion-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.92fr);
+  overflow: hidden;
+  border: 1px solid #ece6e1;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 14px 36px rgb(55 39 28 / 7%);
+}
+
+.detail-image-wrap {
+  min-height: 440px;
+  background: #eee9e4;
+}
+
+.detail-image-wrap img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 440px;
+  object-fit: cover;
+}
+
+.detail-copy {
+  align-self: center;
+  padding: clamp(24px, 5vw, 52px);
+}
+
+.fashion-description {
+  margin: 18px 0 28px;
+  color: #6f6862;
+  font-size: 1.03rem;
+  line-height: 1.8;
+  white-space: pre-line;
+}
+
+.fashion-meta {
+  display: grid;
+  gap: 14px;
+  margin: 0 0 28px;
+  padding: 18px 0;
+  border-top: 1px solid #f0ece8;
+  border-bottom: 1px solid #f0ece8;
+}
+
+.fashion-meta div {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 12px;
+}
+
+.fashion-meta dt {
+  color: #90877f;
+  font-size: 0.85rem;
+}
+
+.fashion-meta dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: #3c342e;
+  font-weight: 700;
+}
+
+.state-message {
+  max-width: 650px;
+  margin: 18px auto;
+  padding: 15px 17px;
+  border-radius: 10px;
+  background: #fff;
+  color: #77716c;
+}
+
+.state-message.error {
+  background: #fff0ed;
+  color: #a13c2e;
+}
+
+@media (max-width: 760px) {
+  :host {
+    padding: 24px 16px 48px;
+  }
+
+  .fashion-detail {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-image-wrap,
+  .detail-image-wrap img {
+    min-height: 0;
+    max-height: 440px;
+    aspect-ratio: 4 / 3;
+  }
+}
+
+@media (max-width: 480px) {
+  .lookup-panel {
+    padding: 20px;
+  }
+
+  .lookup-controls {
+    flex-direction: column;
+  }
+
+  .lookup-controls button {
+    width: 100%;
+  }
+}
