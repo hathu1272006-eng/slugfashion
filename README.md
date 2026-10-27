@@ -100,3 +100,20 @@ npm run test:browser
 Kiểm tra trình duyệt dùng dữ liệu giả lập: chọn slug, phân biệt hai thiết kế cùng tên,
 tải lại URL chi tiết, tra cứu, tìm tiếng Việt không dấu, màn hình nhỏ, trạng thái rỗng/lỗi.
 Không sửa dữ liệu MongoDB.
+
+## Phông chữ tiếng Việt
+
+Ứng dụng đóng gói Noto Sans Variable và Noto Serif Variable qua Fontsource (giấy phép OFL-1.1),
+gồm bộ ký tự tiếng Việt và kiểu nghiêng thật. Font được phục vụ cùng ứng dụng;
+trình duyệt không cần tải font từ Google Fonts hoặc cài font trên máy.
+Sau khi cập nhật bản sửa font, chạy lại `npm ci`, `npm start` và tải lại trang bằng Ctrl+F5.
+
+## Khi giảng viên đã có MongoDB và dataset
+
+`localhost` luôn chỉ máy đang chạy backend. Backend trên máy giảng viên dùng MongoDB
+của giảng viên, không kết nối đến máy sinh viên. Nếu dataset đã có trong
+`FashionData.Fashion` và MongoDB nghe ở `127.0.0.1:27017` thì không cần nhập lại dữ liệu.
+Giảng viên chạy backend rồi frontend theo phần hướng dẫn trên; backend tự chuẩn hóa
+IdF và slug khi khởi động. Nếu địa chỉ hoặc tên database khác, cấu hình
+`MONGODB_URI` / `MONGODB_DATABASE` trước khi chạy backend. Collection mặc định là `Fashion`.
+Nộp mã nguồn và README; chỉ cần kèm dataset nếu bên nhận chưa có dữ liệu hoặc yêu cầu riêng.

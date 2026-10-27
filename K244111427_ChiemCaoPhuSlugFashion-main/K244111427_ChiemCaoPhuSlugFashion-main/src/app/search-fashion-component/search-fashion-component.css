@@ -8,7 +8,7 @@
 .page-heading h1 {
   font-size: 48px;
   font-weight: 400;
-  letter-spacing: -1.5px;
+  letter-spacing: -0.015em;
   margin: 14px 0;
 }
 .description {
@@ -99,9 +99,7 @@ td {
   background: #e4e3d7;
 }
 .id-cell {
-  font:
-    24px Georgia,
-    serif;
+  font: 24px var(--font-display);
   color: var(--forest);
 }
 .similarity-cell {
