@@ -1,5 +1,11 @@
 @charset "UTF-8";
+/* Bundled locally by Angular: includes Vietnamese glyphs and real italic faces. */
+@import "@fontsource-variable/noto-sans/wght.css";
+@import "@fontsource-variable/noto-serif/wght.css";
+@import "@fontsource-variable/noto-serif/wght-italic.css";
 :root {
+  --font-body: "Noto Sans Variable", "Segoe UI", Arial, sans-serif;
+  --font-display: "Noto Serif Variable", "Noto Sans Variable", serif;
   --paper: #f6f5ee;
   --white: #fdfcf8;
   --forest: #243d30;
@@ -16,8 +22,10 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font-family: Arial, "Segoe UI", sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
+  line-height: 1.65;
+  font-synthesis: none;
 }
 a {
   color: inherit;
@@ -51,7 +59,8 @@ select:focus-visible,
 h1,
 h2,
 h3 {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-display);
+  line-height: 1.35;
 }
 .shell {
   max-width: 1240px;
@@ -73,10 +82,8 @@ h3 {
   gap: 10px;
 }
 .wordmark strong {
-  font:
-    700 34px Georgia,
-    serif;
-  letter-spacing: -1.5px;
+  font: 700 34px/1.4 var(--font-display);
+  letter-spacing: normal;
 }
 .wordmark span {
   font-size: 9px;

@@ -53,9 +53,7 @@
   color: #637157;
 }
 .detail-placeholder span {
-  font:
-    italic 160px Georgia,
-    serif;
+  font: italic 160px var(--font-display);
 }
 .detail-placeholder p {
   font-size: 12px;
@@ -76,8 +74,8 @@
 h1 {
   font-size: clamp(38px, 4.4vw, 62px);
   font-weight: 400;
-  line-height: 1.13;
-  letter-spacing: -1.7px;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
   margin: 24px 0 30px;
   overflow-wrap: anywhere;
 }
@@ -98,9 +96,7 @@ h1 {
   color: var(--muted);
 }
 h2 {
-  font:
-    600 11px Arial,
-    sans-serif;
+  font: 600 11px var(--font-body);
   text-transform: uppercase;
   letter-spacing: 1.2px;
   margin: 0 0 14px;
@@ -134,9 +130,7 @@ dd {
   overflow-wrap: anywhere;
 }
 .numeric-id {
-  font:
-    24px Georgia,
-    serif;
+  font: 24px var(--font-display);
   color: var(--forest);
 }
 .slug-row a {
@@ -150,9 +144,7 @@ dd {
   justify-content: space-between;
 }
 .closing-note {
-  font:
-    italic 15px/1.6 Georgia,
-    serif;
+  font: italic 15px/1.6 var(--font-display);
   color: var(--muted);
   margin-top: 22px;
 }
