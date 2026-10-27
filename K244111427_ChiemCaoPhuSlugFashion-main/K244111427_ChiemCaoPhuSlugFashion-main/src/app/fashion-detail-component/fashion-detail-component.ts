@@ -1,59 +1,74 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Fashion } from '../classes/Fashion';
-import { FashionAPIService } from '../services/fashion-apiservice';
+import { Component, DestroyRef, inject, signal } from "@angular/core";
+import { ActivatedRoute, Router } from "@angular/router";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import {
+  catchError,
+  combineLatest,
+  map,
+  of,
+  startWith,
+  Subject,
+  switchMap,
+} from "rxjs";
+import { Fashion } from "../classes/Fashion";
+import { FashionAPIService } from "../services/fashion-apiservice";
 
 @Component({
-  selector: 'app-fashion-detail-component',
+  selector: "app-fashion-detail-component",
   standalone: false,
-  templateUrl: './fashion-detail-component.html',
-  styleUrl: './fashion-detail-component.css',
+  templateUrl: "./fashion-detail-component.html",
+  styleUrl: "./fashion-detail-component.css",
 })
-export class FashionDetailComponent implements OnInit {
+export class FashionDetailComponent {
+  private service = inject(FashionAPIService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
+  private retryLookup = new Subject<void>();
   fashion = signal<Fashion | null>(null);
-  errMessage = signal('');
+  errMessage = signal("");
   isLoading = signal(false);
-  slug = '';
-
-  constructor(
-    private _service: FashionAPIService,
-    private route: ActivatedRoute,
-  ) {}
-
-  ngOnInit(): void {
-    this.route.paramMap.subscribe((params) => {
-      const slug = params.get('slug');
-      if (slug) {
-        this.slug = slug;
-        this.loadFashion(slug);
-      }
-    });
+  imageFailed = signal(false);
+  slug = "";
+  constructor() {
+    combineLatest([
+      this.route.paramMap.pipe(map((params) => params.get("slug") || "")),
+      this.retryLookup.pipe(startWith(undefined)),
+    ])
+      .pipe(
+        map(([slug]) => slug),
+        switchMap((slug) => {
+          this.slug = slug;
+          this.fashion.set(null);
+          this.errMessage.set("");
+          this.imageFailed.set(false);
+          this.isLoading.set(Boolean(slug));
+          if (!slug) return of(null);
+          // switchMap cancels an older request when the selected slug changes.
+          return this.service.getFashionBySlug(slug).pipe(
+            catchError((error: Error) => {
+              this.errMessage.set(error.message);
+              return of(null);
+            }),
+          );
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((item) => {
+        this.fashion.set(item);
+        this.isLoading.set(false);
+      });
   }
-
-  searchFashion(slug: string): void {
-    const normalizedSlug = slug.trim();
-    if (!normalizedSlug) {
-      this.fashion.set(null);
-      this.errMessage.set('Vui lòng nhập slug của Fashion.');
+  searchFashion(): void {
+    const slug = this.slug.trim();
+    if (!slug) {
+      this.errMessage.set("Vui lòng nhập slug của mẫu thời trang.");
       return;
     }
-    this.slug = normalizedSlug;
-    this.loadFashion(normalizedSlug);
-  }
-
-  private loadFashion(slug: string): void {
-    this.fashion.set(null);
-    this.errMessage.set('');
-    this.isLoading.set(true);
-    this._service.getFashionBySlug(slug).subscribe({
-      next: (data) => {
-        this.fashion.set(Object.assign(new Fashion(), data));
-        this.isLoading.set(false);
-      },
-      error: (err: unknown) => {
-        this.errMessage.set(err instanceof Error ? err.message : String(err));
-        this.isLoading.set(false);
-      },
-    });
+    if (slug === this.route.snapshot.paramMap.get("slug")) {
+      this.retryLookup.next();
+      return;
+    }
+    void this.router.navigate(["/fashion-detail", slug]);
   }
 }

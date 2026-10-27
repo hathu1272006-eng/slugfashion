@@ -1,122 +1,101 @@
-const express = require('express');
-const app = express();
-const port = 3002;
+const express = require("express");
+const cors = require("cors");
+const morgan = require("morgan");
+const { MongoClient, ObjectId } = require("mongodb");
+const {
+  ensureFashionMetadata,
+  parseFashionSlug,
+} = require("./fashion-metadata");
 
-const morgan=require("morgan")
-app.use(morgan("combined"))
-
-const path=require("path")
-const fs = require('fs');
-app.use(express.static(path.join(__dirname,"public")))
-
-const cors=require("cors")
-app.use(cors())
-const bodyParser=require("body-parser")
-app.use(bodyParser.json({ limit: '50mb' })); 
-app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
-
-app.listen(port,()=>{
-    console.log(`My Server listening on port ${port}`)
-})
-
-app.get("/",(req,res)=>{
-    res.send("This Web server is processed for MongoDB")
-})
-const { MongoClient, ObjectId } = require('mongodb');
-const client = new MongoClient("mongodb://127.0.0.1:27017");
-const clientConnection = client.connect();
-clientConnection.catch((error) => console.error("Unable to connect to MongoDB:", error));
-const database = client.db("FashionData");      
-const fashionCollection = database.collection("Fashion");
-
-function createFashionSlug(value) {
-    return String(value || "fashion")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/đ/gi, "d")
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-|-$/g, "");
+function createApp(collection) {
+  const app = express();
+  app.use(morgan("dev"));
+  app.use(cors());
+  app.get("/", (_req, res) => res.json({ message: "Fashion API" }));
+  app.get("/fashions", async (_req, res, next) => {
+    try {
+      res.json(await collection.find({}).sort({ IdF: 1 }).toArray());
+    } catch (error) {
+      next(error);
+    }
+  });
+  app.get("/fashions/slug/:slug", async (req, res, next) => {
+    try {
+      const identity = parseFashionSlug(req.params.slug);
+      if (!identity)
+        return res
+          .status(400)
+          .json({ message: "Slug không hợp lệ. Ví dụ: ao-khoac-nu-1." });
+      // Match numeric suffix AND full slug; an incorrect title must not show another item.
+      const fashion = await collection.findOne(identity);
+      if (!fashion)
+        return res
+          .status(404)
+          .json({ message: "Không tìm thấy mẫu thời trang này." });
+      res.json(fashion);
+    } catch (error) {
+      next(error);
+    }
+  });
+  app.get("/fashions/:id", async (req, res, next) => {
+    try {
+      if (!/^[a-f0-9]{24}$/i.test(req.params.id))
+        return res.status(400).json({ message: "Mã MongoDB không hợp lệ." });
+      const fashion = await collection.findOne({
+        _id: new ObjectId(req.params.id),
+      });
+      if (!fashion)
+        return res
+          .status(404)
+          .json({ message: "Không tìm thấy mẫu thời trang này." });
+      res.json(fashion);
+    } catch (error) {
+      next(error);
+    }
+  });
+  app.use((error, _req, res, _next) => {
+    console.error("Fashion API error:", error);
+    res
+      .status(500)
+      .json({ message: "Không thể tải dữ liệu. Vui lòng thử lại sau." });
+  });
+  return app;
 }
 
-let fashionMetadataPromise;
-function ensureFashionMetadata() {
-    if (!fashionMetadataPromise) {
-        fashionMetadataPromise = (async () => {
-            await clientConnection;
-            const fashions = await fashionCollection.find({}).sort({ IdF: 1 }).toArray();
-            const usedIds = new Set();
-            let nextId = fashions.reduce(
-                (maximum, fashion) =>
-                    Number.isSafeInteger(fashion.IdF) && fashion.IdF > maximum
-                        ? fashion.IdF
-                        : maximum,
-                0
-            );
-
-            for (const fashion of fashions) {
-                let id = fashion.IdF;
-                if (!Number.isSafeInteger(id) || id < 1 || usedIds.has(id)) {
-                    id = ++nextId;
-                }
-                usedIds.add(id);
-                nextId = Math.max(nextId, id);
-
-                const slug = `${createFashionSlug(fashion.fashion_subject || "fashion")}-${id}`;
-                if (fashion.IdF !== id || fashion.slug !== slug) {
-                    await fashionCollection.updateOne(
-                        { _id: fashion._id },
-                        { $set: { IdF: id, slug } }
-                    );
-                }
-            }
-
-            await fashionCollection.createIndex({ IdF: 1 }, { unique: true });
-            await fashionCollection.createIndex({ slug: 1 }, { unique: true });
-        })();
+async function startServer() {
+  const client = new MongoClient(
+    process.env.MONGODB_URI || "mongodb://127.0.0.1:27017",
+  );
+  try {
+    await client.connect();
+    const collection = client
+      .db(process.env.MONGODB_DATABASE || "FashionData")
+      .collection("Fashion");
+    // Repair IDs/slugs and create unique indexes BEFORE accepting requests.
+    const updated = await ensureFashionMetadata(collection);
+    const port = Number(process.env.PORT || 3002);
+    const server = createApp(collection).listen(port, () =>
+      console.log(
+        `Fashion API: http://localhost:${port}; updated ${updated} records`,
+      ),
+    );
+    server.on("error", async (error) => {
+      console.error(error);
+      await client.close();
+      process.exitCode = 1;
+    });
+    for (const signal of ["SIGINT", "SIGTERM"]) {
+      process.once(signal, () =>
+        server.close(async () => {
+          await client.close();
+        }),
+      );
     }
-    return fashionMetadataPromise;
+  } catch (error) {
+    await client.close();
+    console.error("Cannot start Fashion API:", error);
+    process.exitCode = 1;
+  }
 }
-
-app.get("/fashions",cors(),async (req,res)=>{
-    try {
-        await ensureFashionMetadata();
-        const result = await fashionCollection.find({}).toArray();
-        res.send(result);
-    } catch (error) {
-        console.error("Unable to load fashions:", error);
-        res.status(500).send({ message: "Unable to load fashions" });
-    }
-});
-
-app.get("/fashions/slug/:slug",cors(),async (req,res)=>{
-    try {
-        await ensureFashionMetadata();
-        const result = await fashionCollection.findOne({ slug: req.params.slug });
-        if (!result) {
-            return res.status(404).send({ message: "Fashion not found" });
-        }
-        res.send(result);
-    } catch (error) {
-        console.error("Unable to load fashion by slug:", error);
-        res.status(500).send({ message: "Unable to load fashion" });
-    }
-});
-
-app.get("/fashions/:id",cors(),async (req,res)=>{
-    try {
-        await ensureFashionMetadata();
-        if (!ObjectId.isValid(req.params.id)) {
-            return res.status(400).send({ message: "Invalid fashion id" });
-        }
-        const result = await fashionCollection.findOne({ _id: new ObjectId(req.params.id) });
-        if (!result) {
-            return res.status(404).send({ message: "Fashion not found" });
-        }
-        res.send(result);
-    } catch (error) {
-        console.error("Unable to load fashion:", error);
-        res.status(500).send({ message: "Unable to load fashion" });
-    }
-});
-
+if (require.main === module) startServer();
+module.exports = { createApp };

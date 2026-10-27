@@ -1,8 +1,10 @@
 <section class="search-fashion">
   <header class="page-heading">
-    <p class="eyebrow">FASHION CATALOG</p>
-    <h1>Search Fashion</h1>
-    <p class="description">Tìm kiếm theo chủ đề hoặc nội dung chi tiết của sản phẩm.</p>
+    <p class="eyebrow">MỐC / TÌM CẢM HỨNG</p>
+    <h1>Đi tìm phong cách của bạn.</h1>
+    <p class="description">
+      Tìm kiếm theo chủ đề hoặc nội dung chi tiết của sản phẩm.
+    </p>
   </header>
 
   <form class="search-panel" (ngSubmit)="searchFashions()">
@@ -13,14 +15,14 @@
         name="query"
         [(ngModel)]="query"
         placeholder="Nhập nội dung cần tìm..."
-      >
+      />
     </label>
 
     <label>
       <span>Tìm trong</span>
       <select name="searchField" [(ngModel)]="searchField">
-        <option value="fashion_subject">Fashion subject</option>
-        <option value="fashion_detail">Fashion detail</option>
+        <option value="fashion_subject">Chủ đề</option>
+        <option value="fashion_detail">Mô tả</option>
       </select>
     </label>
 
@@ -38,59 +40,69 @@
   </form>
 
   @if (errMessage()) {
-    <p class="error-message" role="alert">{{ errMessage() }}</p>
-  }
+  <p class="error-message" role="alert">{{ errMessage() }}</p>
+  } @if (hasSearched()) {
+  <div class="results-heading">
+    <h2>Kết quả tìm kiếm</h2>
+    <span>{{ results().length }} kết quả</span>
+  </div>
 
-  @if (hasSearched()) {
-    <div class="results-heading">
-      <h2>Kết quả tìm kiếm</h2>
-      <span>{{ results().length }} kết quả</span>
-    </div>
-
-    @if (results().length > 0) {
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>IdF</th>
-              <th>Style</th>
-              <th>Fashion subject</th>
-              <th>Fashion detail</th>
-              <th>Image</th>
-              <th>Jaccard Similarity</th>
-              <th>Slug</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (result of results(); track result.fashion._id) {
-              <tr [class]="similarityClass(result.similarity)">
-                <td class="id-cell">{{ result.fashion.IdF }}</td>
-                <td>{{ result.fashion.style }}</td>
-                <td>{{ result.fashion.fashion_subject }}</td>
-                <td>{{ result.fashion.fashion_detail }}</td>
-                <td>
-                  <img
-                    class="fashion-image"
-                    [src]="result.fashion.Base64String"
-                    [alt]="result.fashion.fashion_subject"
-                  >
-                </td>
-                <td class="similarity-cell">{{ result.similarity | percent:'1.0-2' }}</td>
-                <td>
-                  <a class="detail-link" [routerLink]="['/fashion-detail', result.fashion.slug]">
-                    Mở chi tiết
-                  </a>
-                  <a class="slug-value" [routerLink]="['/fashion-detail', result.fashion.slug]">
-                    {{ result.fashion.slug }}
-                  </a>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    } @else {
-      <p class="empty-state">Không tìm thấy Fashion phù hợp với từ khóa.</p>
-    }
-  }
+  @if (results().length > 0) {
+  <div
+    class="table-wrapper"
+    tabindex="0"
+    role="region"
+    aria-label="Kết quả tìm kiếm, có thể cuộn ngang"
+  >
+    <table>
+      <thead>
+        <tr>
+          <th>IdF</th>
+          <th>Phong cách</th>
+          <th>Chủ đề</th>
+          <th>Mô tả</th>
+          <th>Hình ảnh</th>
+          <th>Độ tương đồng</th>
+          <th>Slug</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (result of results(); track result.fashion._id) {
+        <tr [class]="similarityClass(result.similarity)">
+          <td class="id-cell">{{ result.fashion.IdF }}</td>
+          <td>{{ result.fashion.style }}</td>
+          <td>{{ result.fashion.fashion_subject }}</td>
+          <td>{{ result.fashion.fashion_detail }}</td>
+          <td>
+            <img
+              class="fashion-image"
+              [src]="result.fashion.Base64String"
+              [alt]="result.fashion.fashion_subject"
+            />
+          </td>
+          <td class="similarity-cell">
+            {{ result.similarity | percent:'1.0-2' }}
+          </td>
+          <td>
+            <a
+              class="detail-link"
+              [routerLink]="['/fashion-detail', result.fashion.slug]"
+            >
+              Mở chi tiết
+            </a>
+            <a
+              class="slug-value"
+              [routerLink]="['/fashion-detail', result.fashion.slug]"
+            >
+              {{ result.fashion.slug }}
+            </a>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  } @else {
+  <p class="empty-state">Không tìm thấy thiết kế phù hợp với từ khóa.</p>
+  } }
 </section>

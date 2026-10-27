@@ -1,6 +1,6 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { Fashion } from '../classes/Fashion';
-import { FashionAPIService } from '../services/fashion-apiservice';
+import { Component, OnInit, signal } from "@angular/core";
+import { Fashion } from "../classes/Fashion";
+import { FashionAPIService } from "../services/fashion-apiservice";
 
 interface FashionSearchResult {
   fashion: Fashion;
@@ -8,18 +8,18 @@ interface FashionSearchResult {
 }
 
 @Component({
-  selector: 'app-search-fashion-component',
+  selector: "app-search-fashion-component",
   standalone: false,
-  templateUrl: './search-fashion-component.html',
-  styleUrl: './search-fashion-component.css',
+  templateUrl: "./search-fashion-component.html",
+  styleUrl: "./search-fashion-component.css",
 })
 export class SearchFashionComponent implements OnInit {
   fashions: Fashion[] = [];
   results = signal<FashionSearchResult[]>([]);
-  query = '';
-  searchField: 'fashion_subject' | 'fashion_detail' = 'fashion_subject';
+  query = "";
+  searchField: "fashion_subject" | "fashion_detail" = "fashion_subject";
   resultLimit = 10;
-  errMessage = signal('');
+  errMessage = signal("");
   hasSearched = signal(false);
 
   constructor(private fashionService: FashionAPIService) {}
@@ -27,17 +27,21 @@ export class SearchFashionComponent implements OnInit {
   ngOnInit(): void {
     this.fashionService.getFashions().subscribe({
       next: (fashions: Fashion[]) => {
-        this.fashions = fashions.map((fashion) => Object.assign(new Fashion(), fashion));
+        this.fashions = fashions.map((fashion) =>
+          Object.assign(new Fashion(), fashion),
+        );
       },
       error: (error: unknown) => {
-        this.errMessage.set(error instanceof Error ? error.message : String(error));
+        this.errMessage.set(
+          error instanceof Error ? error.message : String(error),
+        );
       },
     });
   }
 
   searchFashions(): void {
     const queryTokens = this.tokenize(this.query);
-    this.errMessage.set('');
+    this.errMessage.set("");
     this.hasSearched.set(true);
 
     if (queryTokens.size === 0) {
@@ -47,9 +51,11 @@ export class SearchFashionComponent implements OnInit {
 
     const rankedResults = this.fashions
       .map((fashion) => {
-        const text = fashion[this.searchField] ?? '';
+        const text = fashion[this.searchField] ?? "";
         const textTokens = this.tokenize(text);
-        const intersectionSize = [...queryTokens].filter((token) => textTokens.has(token)).length;
+        const intersectionSize = [...queryTokens].filter((token) =>
+          textTokens.has(token),
+        ).length;
         const unionSize = new Set([...queryTokens, ...textTokens]).size;
 
         return {
@@ -65,20 +71,20 @@ export class SearchFashionComponent implements OnInit {
 
   similarityClass(similarity: number): string {
     if (similarity >= 0.75) {
-      return 'similarity-high';
+      return "similarity-high";
     }
     if (similarity >= 0.5) {
-      return 'similarity-medium';
+      return "similarity-medium";
     }
-    return 'similarity-low';
+    return "similarity-low";
   }
 
   private tokenize(value: string): Set<string> {
     const normalized = value
-      .toLocaleLowerCase('vi')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/đ/g, 'd');
+      .toLocaleLowerCase("vi")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/g, "d");
 
     return new Set(normalized.match(/[\p{L}\p{N}]+/gu) ?? []);
   }

@@ -1,44 +1,154 @@
-<main class="fashion-page">
-  <header class="page-heading">
-    <div>
-      <p class="eyebrow">FASHION CATALOG</p>
-      <h1>Khám phá thời trang</h1>
-      <p class="description">Bộ sưu tập phong cách được chọn lọc dành cho bạn.</p>
+<main class="collection-page">
+  <section class="collection-intro" aria-labelledby="collection-title">
+    <div class="intro-copy">
+      <p class="eyebrow">THE STYLE ARCHIVE / BỘ SƯU TẬP</p>
+      <h1 id="collection-title">
+        Phong cách riêng.<br /><em>Dấu ấn của bạn.</em>
+      </h1>
+      <p class="intro-description">
+        Một góc nhìn mới về thời trang. Khám phá từng thiết kế, lưu lại những
+        cảm hứng và tìm thấy phong cách thuộc về mình.
+      </p>
+      <a class="text-link" routerLink="/search-fashion"
+        >Tìm cảm hứng của bạn <span aria-hidden="true">↗</span></a
+      >
     </div>
-    <a class="search-link" routerLink="/search-fashion">Tìm kiếm bộ sưu tập</a>
-  </header>
+    <aside class="editorial-note" aria-label="Thông điệp bộ sưu tập">
+      <span class="note-number" aria-hidden="true">M.</span>
+      <p class="eyebrow">MỐC / STYLE NOTES</p>
+      <p class="note-quote">Ít khuôn mẫu.<br />Nhiều bản sắc.</p>
+      <span class="note-bottom"
+        >THỜI TRANG LÀ CÁCH BẠN KỂ CÂU CHUYỆN CỦA MÌNH.</span
+      >
+    </aside>
+  </section>
 
-  @if (errMessage()) {
-    <p class="state-message error" role="alert">{{ errMessage() }}</p>
-  } @else if (isLoading()) {
-    <p class="state-message">Đang tải bộ sưu tập...</p>
-  } @else if (fashions().length === 0) {
-    <p class="state-message">Chưa có mẫu thời trang nào.</p>
-  } @else {
-    <div class="fashion-grid">
-      @for (fashion of fashions(); track fashion.IdF) {
-        <article class="fashion-card">
-          <a class="card-image-link" [routerLink]="['/fashion-detail', fashion.slug]">
-            <img
-              class="fashion-image"
-              [src]="fashion.Base64String"
-              [alt]="fashion.fashion_subject"
-            >
-            <span class="id-badge">#{{ fashion.IdF }}</span>
-          </a>
-          <div class="card-content">
-            <p class="fashion-style">{{ fashion.style || 'FASHION' }}</p>
-            <h2>{{ fashion.fashion_subject }}</h2>
-            <p class="fashion-description">{{ fashion.fashion_detail }}</p>
-            <div class="card-footer">
-              <a class="slug-label" [routerLink]="['/fashion-detail', fashion.slug]">{{ fashion.slug }}</a>
-              <a [routerLink]="['/fashion-detail', fashion.slug]" [attr.aria-label]="'Xem chi tiết ' + fashion.fashion_subject">
-                Xem chi tiết <span aria-hidden="true">→</span>
-              </a>
-            </div>
-          </div>
-        </article>
+  <section
+    class="archive"
+    aria-labelledby="archive-title"
+    [attr.aria-busy]="isLoading()"
+  >
+    <div class="archive-heading">
+      <div>
+        <p class="eyebrow">KHÁM PHÁ THIẾT KẾ</p>
+        <h2 id="archive-title">
+          Tủ đồ cảm hứng<span class="count">{{ fashions().length }}</span>
+        </h2>
+      </div>
+      <a class="text-link" routerLink="/fashion-detail"
+        >Tra cứu bằng slug <span aria-hidden="true">↗</span></a
+      >
+    </div>
+    @if (styles().length > 0) {
+    <div class="filters" role="group" aria-label="Lọc theo phong cách">
+      <button
+        type="button"
+        [class.active]="selectedStyle() === ''"
+        [attr.aria-pressed]="selectedStyle() === ''"
+        (click)="selectedStyle.set('')"
+      >
+        Tất cả
+      </button>
+      @for (style of styles(); track style) {
+      <button
+        type="button"
+        [class.active]="selectedStyle() === style"
+        [attr.aria-pressed]="selectedStyle() === style"
+        (click)="selectedStyle.set(style)"
+      >
+        {{ style }}
+      </button>
       }
     </div>
-  }
+    } @if (isLoading()) {
+    <div class="state-panel" role="status">
+      <span class="loading-dot"></span> Đang mở tủ đồ cảm hứng…
+    </div>
+    } @else if (errMessage()) {
+    <div class="state-panel error" role="alert">
+      <p>{{ errMessage() }}</p>
+      <button class="button" type="button" (click)="loadFashions()">
+        Thử lại
+      </button>
+    </div>
+    } @else if (visibleFashions().length === 0) {
+    <div class="state-panel">
+      <h3>Bộ sưu tập đang chờ câu chuyện đầu tiên.</h3>
+      <p>Chưa có mẫu thời trang để hiển thị.</p>
+    </div>
+    } @else {
+    <div
+      class="table-scroll"
+      tabindex="0"
+      role="region"
+      aria-label="Danh sách thời trang; cuộn ngang trên màn hình nhỏ"
+    >
+      <table class="fashion-table">
+        <caption class="sr-only">
+          Danh sách thời trang với mã IdF duy nhất và liên kết slug tới trang
+          chi tiết
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">IdF</th>
+            <th scope="col">Thiết kế</th>
+            <th scope="col">Phong cách</th>
+            <th scope="col">Slug / Khám phá</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (fashion of visibleFashions(); track fashion.IdF) {
+          <tr>
+            <td class="id-cell">
+              <span class="id-prefix">NO.</span>{{ fashion.IdF }}
+            </td>
+            <td>
+              <a
+                class="design-link"
+                [routerLink]="['/fashion-detail', fashion.slug]"
+              >
+                <span class="thumbnail"
+                  ><span class="image-fallback" aria-hidden="true">M.</span> @if
+                  (fashion.Base64String) {
+                  <img
+                    [src]="fashion.Base64String"
+                    alt=""
+                    loading="lazy"
+                    (error)="hideBrokenImage($event)"
+                  />
+                  }
+                </span>
+                <span class="design-copy"
+                  ><strong
+                    >{{ fashion.fashion_subject || 'Thiết kế chưa đặt tên'
+                    }}</strong
+                  ><span class="excerpt"
+                    >{{ fashion.fashion_detail }}</span
+                  ></span
+                >
+              </a>
+            </td>
+            <td>
+              <span class="style-tag">{{ fashion.style || 'Tự do' }}</span>
+            </td>
+            <td>
+              <a
+                class="slug-link"
+                [routerLink]="['/fashion-detail', fashion.slug]"
+                [attr.aria-label]="'Xem chi tiết ' + fashion.fashion_subject"
+                ><span>{{ fashion.slug }}</span
+                ><span class="open-arrow" aria-hidden="true">↗</span></a
+              >
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="archive-footer">
+      <span>{{ visibleFashions().length }} thiết kế đang hiển thị</span
+      ><span>Mỗi thiết kế, một bản sắc.</span>
+    </p>
+    }
+  </section>
 </main>
